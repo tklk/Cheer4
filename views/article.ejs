@@ -1,0 +1,23 @@
+<%- include header %>
+
+	<p>
+		<!-- Edit post -->
+		<% if (user && (user.name == post.name)) { %>
+			<span>
+				<a class="edit" href="/edit/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
+					<i class="far fa-edit"> Edit post</i>
+				</a>
+			</span>
+			<span>
+				<a class="edit" href="/remove/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
+					<i class="far fa-trash-alt"> Delete post</i>
+				</a>
+			</span>
+		<% } %>		
+	</p>
+
+<%- include discussion %>
+
+<%- include comment %>
+
+<%- include footer %>

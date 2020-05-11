@@ -1,0 +1,62 @@
+<!-- Discussion panel
+==== User, Time, Hashtag, Share, Post, Read cnt, Comment cnt, Share cnt ====================== -->
+
+<div class = "discussion">
+	<p class="info">
+		<i class="fas fa-user-circle"></i><a href="/u/<%= post.name %>"> <%= post.name %></a> | 
+		<i class="far fa-clock"></i> <%= post.time.minute %> | 
+		<!-- Show tag -->
+			<% post.tags.forEach(function (tag, index) { %>
+				<% if (tag) { %>
+					<a class="tag" href="/tags/<%= tag %>"><i class="fas fa-hashtag"></i> <%= tag %></a>
+				<% } %>
+			<% }) %>		
+		<% if (post.reprint_info.reprint_from) { %>
+			 | 
+			<a  title = "Original post" href="/u/<%= post.reprint_info.reprint_from.name %>/<%= post.reprint_info.reprint_from.day %>/<%= post.reprint_info.reprint_from.title %>">
+				<i class="fas fa-undo-alt"> Original</i>
+			</a>
+		<% } %>
+		<!-- Share post -->
+		<% var flag = 1 %>
+			<% if (user && (user.name != post.name)) { %>
+				<% if ((post.reprint_info.reprint_from != undefined) && (user.name == post.reprint_info.reprint_from.name)) { %>
+					<% flag = 0 %>
+				<% } %>
+				<% if ((post.reprint_info.reprint_to != undefined)) { %>
+					<% post.reprint_info.reprint_to.forEach(function (reprint_to, index) { %>
+						<% if (user.name == reprint_to.name) { %>
+							<% flag = 0 %>
+						<% } %>
+					<% }) %>
+				<% } %>
+			<% } else { %>
+				<% flag = 0 %>
+			<% } %>
+		<% if (flag) { %>
+			<span>
+				 | 
+				<a class="" href="/reprint/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
+					<i class="far fa-share-square"></i> Share
+				</a>
+			</span>
+		<% } %>
+	</p>
+
+	<p class="post">
+		<%- post.post %>
+	</p>
+
+	<!-- Post interaction -->
+
+	<p class="post-int">
+		<i class="fas fa-glasses"></i> Read: <%= post.pv %> | 
+		<i class="far fa-comment-dots"></i> Comment : <%= post.comments.length %> | 
+		<i class="fas fa-retweet"></i> Share:
+		<% if (post.reprint_info.reprint_to) { %>
+			<%= post.reprint_info.reprint_to.length %>
+		<% } else { %>
+			<%= 0 %>
+		<% } %>
+	</p>
+</div>

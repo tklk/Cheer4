@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Cheers</title>
+	<link rel="stylesheet" href="/stylesheets/style.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+</head>
+
+<body>
+
+<!-- Header ================================================== -->
+<header>
+	<h1><%= title %></h1>
+    <nav id="nav-wrap">
+		<ul id="nav" class="nav">
+			<li class="current"><a class="" title="homepage" href="/"><i class="fas fa-home"></i></a></li>
+			<% if (user) { %>
+				<li><a class="">
+					<form action="/search" method="GET">
+						<i class="fas fa-search-plus"></i>
+						<input type="text" name="keyword" placeholder="Search Cheers" class="search" />
+					</form>
+				</a></li>
+			<% } %>
+			<li><a class="" title="archive" href="/archive"><i class="far fa-folder-open"></i></a></li>
+			<li><a class="" title="tags" href="/tags"><i class="fas fa-hashtag"></i></a></li>
+			<% if (user) { %>
+				<li><a class="" title="Link" href="/links"><i class="fas fa-link"></i></a></li>
+				<li><a class="" title="post" href="/post"><i class="fas fa-pen-square"></i></a></li>
+				<li><a class="" title="upload" href="/upload"><i class="fas fa-cloud-upload-alt"></i></a></li>
+				<li class="current"><a class="" title="logout" href="/logout"><i class="fas fa-sign-out-alt"></i></a></li>
+			<% } else { %>
+				<li class="current"><a class="" title="login" href="/login"><i class="fas fa-sign-in-alt"></i></a></li>
+				<li class="current"><a class="" title="register" href="/reg"><i class="fas fa-user-plus"></i></a></li>
+			<% } %>
+		</ul> <!-- end #nav -->
+    </nav> <!-- end #nav-wrap -->
+</header>
+
+
+<article>
+<% if (success) { %>
+	<div><i id = "success" class="far fa-check-circle"></i> <%= success %></div>
+<% } %>
+
+<% if (error) { %>
+	<div><i id = "fail" class="fas fa-bug"></i> <%= error %></div>
+<% } %>
