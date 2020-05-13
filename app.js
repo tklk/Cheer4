@@ -4,10 +4,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var favicon = require('serve-favicon');
 var indexRouter = require('./routes/index');
 
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+
+//
+const config = require('config-lite')(__dirname);
 
 // Upload file
 var multer  = require('multer');
@@ -20,12 +24,13 @@ var flash = require('connect-flash');
 
 // Logging
 var fs = require('fs');
-var accessLog = fs.createWriteStream('access.log', {flags: 'a'});
-var errorLog = fs.createWriteStream('error.log', {flags: 'a'});
+var accessLog = fs.createWriteStream('logs/access.log', {flags: 'a'});
+var errorLog = fs.createWriteStream('logs/error.log', {flags: 'a'});
 
 var app = express();
 
 // view engine setup
+app.use(favicon(__dirname + '/public/favicon.ico'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -40,13 +45,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Store errorlog
-app.use(function (err, req, res, next) {
-  var meta = '[' + new Date() + '] ' + req.url + '\n';
-  errorLog.write(meta + err.stack + '\n');
-  next();
-});
-
 app.use(session({
   secret: settings.cookieSecret,
   key: settings.db,//cookie name
@@ -56,7 +54,49 @@ app.use(session({
   })
 }));
 
+/*
+app.use(session({
+	key: config.session.key, // session id
+	secret: config.session.secret, // protect cookie from manual manipulation
+    cookie: {
+    	maxAge: config.session.maxAge
+    },
+	store: new MongoStore({
+	    url: config.mongodb
+	})
+}));
+
+// 监听端口，启动程序
+app.listen(config.port, function () {
+  console.log(`${pkg.name} listening on port ${config.port}`)
+})
+
+
+// 设置模板全局常量
+app.locals.cheers = {
+	title: pkg.name,
+	description: pkg.description
+}
+
+// 添加模板必需的三个变量
+app.use(function (req, res, next) {
+  res.locals.user = req.session.user
+  res.locals.success = req.flash('success').toString()
+  res.locals.error = req.flash('error').toString()
+  next()
+})
+*/
+
 app.use('/', indexRouter);
+
+
+// Store errorlog
+app.use(function (err, req, res, next) {
+  var meta = '[' + new Date() + '] ' + req.url + '\n';
+  errorLog.write(meta + err.stack + '\n');
+  next();
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

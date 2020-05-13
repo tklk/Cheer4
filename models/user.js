@@ -1,5 +1,6 @@
-var mongodb = require('./db'),
-	crypto = require('crypto');
+var crypto = require('crypto');
+var mongodb = require('./db');
+var async = require('async');
 
 function User(user) {
 	this.name = user.name;
@@ -26,28 +27,29 @@ User.prototype.save = function(callback) {
 		email: this.email,
 		head: head
 	};
-	// Open db
-	mongodb.open(function (err, db) {
-		if (err) {
-			return callback(err);
-		}
-		// Read users' cluster
-		db.collection('users', function (err, collection) {
-			if (err) {
-				mongodb.close();
-				return callback(err);
-			}
+	async.waterfall([
+		function (callback) {
+			mongodb.open(function (err, db) {
+				callback(err, db);
+			});
+		},
+		function (db, callback) {
+			// Read users' collection
+			db.collection('users', function (err, collection) {
+				callback(err, collection);
+			});
+		},
+		function (collection, callback) {
 			// Add user
 			collection.insert(user, {
 				safe: true
 			}, function (err, user) {
-				mongodb.close();
-				if (err) {
-					return callback(err);
-				}
-				callback(null, user[0]); // succeed
+				callback(err, user);
 			});
-		});
+		},
+	], function (err, user) {
+		mongodb.close();
+		callback(err, user[0]); // succeed
 	});
 };
 
@@ -57,25 +59,26 @@ User.prototype.save = function(callback) {
 /*      else return error
 /**/
 User.get = function(name, callback) {
-	mongodb.open(function (err, db) {
-		if (err) {
-			return callback(err);
-		}
-		db.collection('users', function (err, collection) {
-			if (err) {
-				mongodb.close();
-				return callback(err);
-			}
-			// Search user by username
+	async.waterfall([
+		function (callback) {
+			mongodb.open(function (err, db) {
+				callback(err, db);
+			});
+		},
+		function (db, callback) {
+			db.collection('users', function (err, collection) {
+				callback(err, collection);
+			});
+		},
+		function (collection, callback) {
 			collection.findOne({
 				name: name
 			}, function (err, user) {
-				mongodb.close();
-				if (err) {
-					return callback(err);
-				}
-				callback(null, user);
+				callback(err, user);
 			});
-		});
+		}
+	], function (err, user) {
+		mongodb.close();
+		callback(err, user);
 	});
 };

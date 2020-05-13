@@ -1,3 +1,4 @@
+var async = require('async');
 var mongodb = require('./db');
 
 function Comment(name, day, title, comment) {
@@ -20,30 +21,32 @@ Comment.prototype.save = function(callback) {
 		title = this.title,
 		comment = this.comment;
 	// Opend db
-	mongodb.open(function (err, db) {
-		if (err) {
-			return callback(err);
-		}
-		// Read posts' cluster
-		db.collection('posts', function (err, collection) {
-			if (err) {
-				mongodb.close();
-				return callback(err);
-			}
-			// Search doc by name, time, subject, update comment into doc
+	async.waterfall([
+		function (callback) {
+			mongodb.open(function (err, db) {
+				callback(err, db);
+			});
+		},
+		function (db, callback) {
+			// Read posts' collection
+			db.collection('posts', function (err, collection) {
+				callback(err, collection);
+			});
+		},
+		function (collection, callback) {
+			// Search by name, time, subject, update comment into doc
 			collection.update({
 				"name": name,
 				"time.day": day,
 				"title": title
 			}, {
 				$push: {"comments": comment}
-			} , function (err) {
-				mongodb.close();
-				if (err) {
-					return callback(err);
-				}
-				callback(null);
-			});   
-		});
+			}, function (err) {
+				callback(err, null);
+			});
+		},
+	], function (err, comment) {
+		mongodb.close();
+		callback(err, null); // succeed
 	});
 };

@@ -1,12 +1,17 @@
 {
-  "name": "blog",
-  "version": "0.0.0",
+  "name": "cheer4",
+  "version": "1.0.0",
+  "description": "social media",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "nodemon ./bin/www"
+    "devstart": "nodemon ./bin/www",
+    "heroku": "node ./bin/www"
   },
+  "author": "tklk",
   "dependencies": {
+    "async": "3.2.0",
+    "config-lite": "3.0.0",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^3.2.0",
     "cookie-parser": "~1.4.4",
@@ -18,7 +23,8 @@
     "markdown": "^0.5.0",
     "mongodb": "^2.2.33",
     "morgan": "~1.9.1",
-    "multer": "^1.4.2"
+    "multer": "^1.4.2",
+    "serve-favicon": "2.5.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.3"
