@@ -20,7 +20,7 @@
 				<li class="search"><a >
 					<form action="/search" method="GET">
 						<i class="fas fa-search-plus"></i>
-						<input type="text" name="keyword" placeholder="Search Cheers" class="search-keyword" />
+						<input type="text" name="keyword" placeholder="Search Cheers" class="search-keyword" required/>
 					</form>
 				</a></li>
 			<% } %>
@@ -33,9 +33,10 @@
 				<button class="collapsible"><i class="fas fa-chevron-circle-down"></i></button>
 				<div class="content">
 					<li class="act"><a class="" title="logout" href="/logout"><i class="fas fa-sign-out-alt"></i></a></li>
+					<li class="act"><a class="" title="reset" href="/reset"><i class="fas fa-user-lock"></i></a></li>
 				</div>
 			<% } else { %>
-			<button class="collapsible"><i class="fas fa-chevron-circle-down"></i></button>
+				<button class="collapsible"><i class="fas fa-chevron-circle-down"></i></button>
 				<div class="content">
 					<li class="act"><a class="" title="login" href="/login"><i class="fas fa-sign-in-alt"></i></a></li>
 					<li class="act"><a class="" title="register" href="/reg"><i class="fas fa-user-plus"></i></a></li>

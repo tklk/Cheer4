@@ -1,30 +1,44 @@
 <br />
 <!-- Past comments -->
+<% if (undefined != post.comments) { %>		
 <% post.comments.forEach(function (comment, index) { %>
     <div class="comment">
         <p>
             <img src="<%= comment.head %>" class="head" />
-            <a href="<%= comment.website %>">@ <%= comment.name %></a>
+            <a href="/u/<%= post.name %>">@ <%= comment.name %></a><!--"<%= comment.website %>"></a>-->
 
             <span class="reply_info" >
                 <i class="far fa-clock"></i> <%= comment.time %>
+                <% if (user && (user.name == comment.name)){ %>
+                    <span>
+                        <a class="edit" href="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>/<%= post._id %>/edit/<%= comment._id %>">
+                            <i class="far fa-edit" style="font-size: 1.2em"> Edit</i>
+                        </a>
+                    </span>
+                    <span>
+                        <a class="edit" href="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>/<%= post._id %>/remove/<%= comment._id %>">
+                            <i class="far fa-trash-alt" style="font-size: 1.2em"> Delete</i>
+                        </a>
+                    </span>
+                <% } %>
                 <%- comment.content %>
             </span>
         </p>
     </div>
 <% }) %>
+<% } %>
 <!-- New comments -->
 <form method="post">
     <% if (user) { %>
         <i class="fas fa-user-circle"></i> name: <input type="text" name="name" value="<%= user.name %>" /><br />
         <i class="fas fa-dove"></i> mail: <input type="text" name="email" value="<%= user.email %>" /><br />
         <i class="fas fa-link"></i> site: <input type="text" name="website" value="/u/<%= user.name %>" /><br />
+        <br />
+        <textarea name="content" rows="5" cols="80" required></textarea><br />
+        <input type="submit" value="Reply"/>   
     <% } else { %>
-        <i class="fas fa-user-circle"></i> name: <input type="text" name="name" /><br />
-        <i class="fas fa-dove"></i> mail: <input type="text" name="email" /><br />
-        <i class="fas fa-link"></i> site: <input type="text" name="website" value="http://" /><br />
+        <a class="" title="register" href="/reg">
+            <i class="fas fa-american-sign-language-interpreting" style="font-size: 1.5em;">Join the community to reply</i>
+        </a>       
     <% } %>
-    <br />
-    <textarea name="content" rows="5" cols="80"></textarea><br />
-    <input type="submit" value="Reply" />
 </form>

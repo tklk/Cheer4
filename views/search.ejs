@@ -10,7 +10,7 @@
   			<% lastYear = post.time.year %>
   		<% } %>
     	<li><time><%= post.time.day %></time></li>
-    	<li><a href="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>"><%= post.title %></a></li>
+    	<li><a href="/u/<%= post.name %>/<%= post.time.day %>/<%= post.title %>/<%= post._id %>"><%= post.title %></a></li>
 	<% }) %>
 	<% if (!noresult) { %>
 		We didn't find any results. <br />

@@ -1,44 +1,32 @@
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const favicon = require('serve-favicon');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const errorController = require('./controllers/lib/error');
+const flash = require('connect-flash');
+const fs = require('fs');
+const helmet = require('helmet');
+const compression = require('compression');
 
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var favicon = require('serve-favicon');
-var indexRouter = require('./routes/index');
+const app = express();
 
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
-
-//
-const config = require('config-lite')(__dirname);
-
-// Upload file
-var multer  = require('multer');
-
-// Connection
-var settings = require('./settings');
-
-// used as showing status
-var flash = require('connect-flash');
-
-// Logging
-var fs = require('fs');
-var accessLog = fs.createWriteStream('logs/access.log', {flags: 'a'});
-var errorLog = fs.createWriteStream('logs/error.log', {flags: 'a'});
-
-var app = express();
-
-// view engine setup
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(flash());
-app.use(logger('dev'));
 
-// Store accesslog
-app.use(logger({stream: accessLog}));
+app.use(logger('dev'));
+app.use(helmet()); // protection
+app.use(compression()); // asset compression
+if (app.settings.env === "development" ) {
+    const accessLogStream = fs.createWriteStream( path.join(__dirname, 'logs', 'access.log'), { flags: 'a' });
+    app.use(logger({ stream: accessLogStream }));
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -46,74 +34,47 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: settings.cookieSecret,
-  key: settings.db,//cookie name
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},//30 days
-  store: new MongoStore({
-    url:'mongodb://localhost/blog'
-  })
+    secret: process.env.DB_SECERT,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 },
+    store: new MongoDBStore({ uri: process.env.MONGODB_URI, collection: 'sessions' })
 }));
+//30 days
 
-/*
-app.use(session({
-	key: config.session.key, // session id
-	secret: config.session.secret, // protect cookie from manual manipulation
-    cookie: {
-    	maxAge: config.session.maxAge
-    },
-	store: new MongoStore({
-	    url: config.mongodb
-	})
-}));
+let router = express.Router();
+router = require('./routers')(app);
 
-// 监听端口，启动程序
-app.listen(config.port, function () {
-  console.log(`${pkg.name} listening on port ${config.port}`)
-})
+app.get('/500', errorController.get500);
+app.use(errorController.get404);
 
+(async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        const port = process.env.PORT || 3000;
+        app.listen(port);
+        console.log("DB connect and Express server listening on port %d in %s mode", port, app.settings.env);
+    } catch (err) {
+        console.error('Fail to connect to %s error: ', process.env.MONGODB_URI, err.message);
+        process.exit(1);
+    }
+})();
 
-// 设置模板全局常量
-app.locals.cheers = {
-	title: pkg.name,
-	description: pkg.description
-}
+const Test = require('./Test/initDB');
+test_1 = new Test("tkl");
+test_1.init();
 
-// 添加模板必需的三个变量
-app.use(function (req, res, next) {
-  res.locals.user = req.session.user
-  res.locals.success = req.flash('success').toString()
-  res.locals.error = req.flash('error').toString()
-  next()
-})
-*/
-
-app.use('/', indexRouter);
-
-
-// Store errorlog
-app.use(function (err, req, res, next) {
-  var meta = '[' + new Date() + '] ' + req.url + '\n';
-  errorLog.write(meta + err.stack + '\n');
-  next();
+app.use((err, req, res, next) => {
+    if (app.settings.env === "development" ) {
+        const errorLogStream = fs.createWriteStream( path.join(__dirname, 'logs', '/error.log'), { flags: 'a' });
+        const meta = '[' + new Date() + '] ' + req.url + '\n';
+        errorLogStream.write(meta + err.stack + '\n');
+    }
+    
+    res.status(500).render('500', {
+        title: '',
+        user: req.session.user,
+        success: req.flash('success').toString(),
+        error: req.flash('error').toString()
+    });
 });
-
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-
-module.exports = app;
-

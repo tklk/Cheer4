@@ -1,4 +1,4 @@
-/**/
+/*  */
 header {
    position: relative;
    width: 100%;
@@ -301,4 +301,14 @@ article a:hover {
 	padding-top: 5px;
 	border-top: solid;
 	border-width: 1px;
+}
+
+.ori-post {
+	background-color: #ffffff;
+	padding-left: 1em;
+	padding-top: .1em;
+	padding-bottom: .1em;
+	border-radius: 10px;
+	margin-top: 12px;
+	margin-bottom: 12px;
 }

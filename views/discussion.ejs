@@ -8,22 +8,22 @@
 		<!-- Show tag -->
 			<% post.tags.forEach(function (tag, index) { %>
 				<% if (tag) { %>
-					<a class="tag" href="/tags/<%= tag %>"><i class="fas fa-hashtag"></i> <%= tag %></a>
+					<a class="tag" href="/tags/<%= tag %>"><i class="fas fa-thumbtack" style="font-size: 0.7em;"></i> <%= tag %></a>
 				<% } %>
 			<% }) %>		
-		<% if (post.reprint_info.reprint_from) { %>
-			 | 
-			<a  title = "Original post" href="/u/<%= post.reprint_info.reprint_from.name %>/<%= post.reprint_info.reprint_from.day %>/<%= post.reprint_info.reprint_from.title %>">
-				<i class="fas fa-undo-alt"> Original</i>
-			</a>
-		<% } %>
+			<% if (post.reprint_info.reprint_from && (post.reprint_info.reprint_from.pid)) { %>
+				| 
+				<a  title = "Original post" href="/u/<%= post.reprint_info.reprint_from.name %>/<%= post.reprint_info.reprint_from.day %>/<%= post.reprint_info.reprint_from.title %>/<%= post.reprint_info.reprint_from.pid %>">
+					<i class="fas fa-undo-alt"> Original</i>
+				</a>
+			<% } %>
 		<!-- Share post -->
 		<% var flag = 1 %>
-			<% if (user && (user.name != post.name)) { %>
+			<% if (user && (user.name != post.name)) { %> <!--register user and not the origin-->
 				<% if ((post.reprint_info.reprint_from != undefined) && (user.name == post.reprint_info.reprint_from.name)) { %>
 					<% flag = 0 %>
 				<% } %>
-				<% if ((post.reprint_info.reprint_to != undefined)) { %>
+				<% if (post.reprint_info.reprint_to != undefined) { %>
 					<% post.reprint_info.reprint_to.forEach(function (reprint_to, index) { %>
 						<% if (user.name == reprint_to.name) { %>
 							<% flag = 0 %>
@@ -36,7 +36,7 @@
 		<% if (flag) { %>
 			<span>
 				 | 
-				<a class="" href="/reprint/<%= post.name %>/<%= post.time.day %>/<%= post.title %>">
+				<a class="" href="/reprint/<%= post.name %>/<%= post.time.day %>/<%= post.title %>/<%= post._id %>">
 					<i class="far fa-share-square"></i> Share
 				</a>
 			</span>
@@ -45,15 +45,36 @@
 
 	<p class="post">
 		<%- post.post %>
+		
+		<% if (post.reprint_info.reprint_from) { %>
+			<p class = "ori-post">
+			<% if (post.reprint_info.reprint_from.pid) { %>
+				<i class="fas fa-user-circle"></i><a href="/u/<%= post.reprint_info.reprint_from.name %>"> <%= post.reprint_info.reprint_from.name %> </a> | 
+				<i class="far fa-clock"></i> <%= post.reprint_info.reprint_from.day.getFullYear() %>-<%= post.reprint_info.reprint_from.day.getMonth()+1 %>-<%= post.reprint_info.reprint_from.day.getDate() %>
+				</br>
+				<a  title = "Original post" href="/u/<%= post.reprint_info.reprint_from.name %>/<%= post.reprint_info.reprint_from.day %>/<%= post.reprint_info.reprint_from.title %>/<%= post.reprint_info.reprint_from.pid %>">
+					<i class="fas fa-undo-alt"> See original post</i>
+				</a>
+			<% } else { %>
+				<i class="fas fa-ghost"></i>
+				Original post has been removed
+			<% } %>
+			</p>
+		<% } %>
 	</p>
 
 	<!-- Post interaction -->
 
 	<p class="post-int">
 		<i class="fas fa-glasses"></i> Read: <%= post.pv %> | 
-		<i class="far fa-comment-dots"></i> Comment : <%= post.comments.length %> | 
+		<i class="far fa-comment-dots"></i> Comment : <% if (undefined != post.comments) { %>		
+			<%= post.comments.length %>
+		<% } else { %>
+			<%= 0 %>
+		<% } %> | 
 		<i class="fas fa-retweet"></i> Share:
-		<% if (post.reprint_info.reprint_to) { %>
+		
+		<% if (undefined != post.reprint_info.reprint_to) { %>		
 			<%= post.reprint_info.reprint_to.length %>
 		<% } else { %>
 			<%= 0 %>
